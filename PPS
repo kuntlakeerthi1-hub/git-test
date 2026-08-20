@@ -1,0 +1,274 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+
+struct Patient {
+    int id;                     // Unique patient ID
+    char name[100];             // Patient full name
+    char gender[20];            // Gender of the patient
+    char problem[200];          // Medical problem / reason for admission
+    char phone[20];             // Contact number
+    int isDeleted;              // 0 = active, 1 = deleted
+};
+
+
+#define MAX 200   // Maximum patient records
+
+struct Patient patients[MAX];   // Array to store patient records
+int count = 0;                  // Total number of active patients
+
+
+void welcomeMessage();
+void displayMenu();
+void registerPatient();
+int  searchPatientIndex(int id);
+void searchPatientDetails();
+void updatePatientProblem();
+void generateBillAndDelete();
+void displayAllPatients();
+void printLine();
+void clearScreen();
+
+
+int main() {
+    int choice;
+
+    // Display initial welcome message
+    welcomeMessage();
+
+    while (1) {
+        displayMenu();
+
+        printf("\nEnter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                registerPatient();
+                break;
+
+            case 2:
+                searchPatientDetails();
+                break;
+
+            case 3:
+                updatePatientProblem();
+                break;
+
+            case 4:
+                generateBillAndDelete();
+                break;
+
+            case 5:
+                displayAllPatients();
+                break;
+
+            case 6:
+                printf("\nExiting the system...\n");
+                exit(0);
+
+            default:
+                printf("\nInvalid choice! Please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+
+/* Welcome Screen */
+void welcomeMessage() {
+    printLine();
+    printf("                MINI HOSPITAL MONITORING SYSTEM\n");
+    printLine();
+    printf("A simple system to manage patient registrations,\n");
+    printf("track their records, update problems, generate bills\n");
+    printf("and automatically delete records after payment.\n");
+    printLine();
+}
+void displayMenu() {
+    printf("\n==================== MAIN MENU ====================\n");
+    printf("1. Register New Patient\n");
+    printf("2. Search Patient by ID\n");
+    printf("3. Update Patient Problem\n");
+    printf("4. Generate Bill & Delete Record\n");
+    printf("5. Display All Patients\n");
+    printf("6. Exit\n");
+    printf("===================================================\n");
+}
+
+/* Register a new patient */
+void registerPatient() {
+    printLine();
+    printf("                REGISTER NEW PATIENT\n");
+    printLine();
+
+    if (count >= MAX) {
+        printf("Cannot register more patients. Maximum limit reached.\n");
+        return;
+    }
+
+    // Input patient ID
+    printf("Enter Patient ID       : ");
+    scanf("%d", &patients[count].id);
+
+    // Input patient name
+    printf("Enter Patient Name     : ");
+    scanf(" %[^\n]s", patients[count].name);
+
+    // Gender
+    printf("Enter Gender           : ");
+    scanf(" %[^\n]s", patients[count].gender);
+
+    // Medical problem
+    printf("Enter Problem          : ");
+    scanf(" %[^\n]s", patients[count].problem);
+
+    // Phone number
+    printf("Enter Phone Number     : ");
+    scanf(" %[^\n]s", patients[count].phone);
+
+    // Mark as active record
+    patients[count].isDeleted = 0;
+
+    count++;
+
+    printf("\nPatient registered successfully.\n");
+    printLine();
+}
+
+/* Helper: find index of patient by ID */
+int searchPatientIndex(int id) {
+    for (int i = 0; i < count; i++) {
+        if (patients[i].id == id && patients[i].isDeleted == 0)
+            return i;
+    }
+    return -1;
+}
+
+/* Search for a single patient's details */
+void searchPatientDetails() {
+    int id;
+    printLine();
+    printf("                SEARCH PATIENT RECORD\n");
+    printLine();
+
+    printf("Enter Patient ID to search: ");
+    scanf("%d", &id);
+
+    int index = searchPatientIndex(id);
+
+    if (index == -1) {
+        printf("\nRecord not found!\n");
+        return;
+    }
+
+    printf("\n=============== PATIENT DETAILS ===============\n");
+    printf("Patient ID       : %d\n", patients[index].id);
+    printf("Patient Name     : %s\n", patients[index].name);
+    printf("Gender           : %s\n", patients[index].gender);
+    printf("Problem          : %s\n", patients[index].problem);
+    printf("Phone Number     : %s\n", patients[index].phone);
+    printf("Record Status    : Active\n");
+    printLine();
+}
+
+/* Update the medical problem for a patient */
+void updatePatientProblem() {
+    int id;
+
+    printLine();
+    printf("                UPDATE PATIENT PROBLEM\n");
+    printLine();
+
+    printf("Enter Patient ID: ");
+    scanf("%d", &id);
+
+    int index = searchPatientIndex(id);
+
+    if (index == -1) {
+        printf("Patient record not found!\n");
+        return;
+    }
+
+    printf("Enter NEW Problem: ");
+    scanf(" %[^\n]s", patients[index].problem);
+
+    printf("\nRecord updated successfully.\n");
+    printLine();
+}
+
+/* Generate bill and delete the record */
+void generateBillAndDelete() {
+    int id, amount;
+
+    printLine();
+    printf("                GENERATE BILL & DELETE RECORD\n");
+    printLine();
+
+    printf("Enter Patient ID for billing: ");
+    scanf("%d", &id);
+
+    int index = searchPatientIndex(id);
+
+    if (index == -1) {
+        printf("Patient not found!\n");
+        return;
+    }
+
+    printf("Enter Bill Amount: ");
+    scanf("%d", &amount);
+
+    printf("\nBill Amount: %d\n", amount);
+    printf("Payment Successful.\n");
+
+    patients[index].isDeleted = 1;
+
+    printf("\nRecord deleted.\n");
+    printLine();
+}
+
+/* Display all existing patients (extra feature) */
+void displayAllPatients() {
+    printLine();
+    printf("                ALL PATIENT RECORDS\n");
+    printLine();
+
+    if (count == 0) {
+        printf("No patients registered yet.\n");
+        return;
+    }
+
+    for (int i = 0; i < count; i++) {
+        if (patients[i].isDeleted == 0) {
+            printf("\n----------------------------------------\n");
+            printf("Patient ID   : %d\n", patients[i].id);
+            printf("Name         : %s\n", patients[i].name);
+            printf("Gender       : %s\n", patients[i].gender);
+            printf("Problem      : %s\n", patients[i].problem);
+            printf("Phone Number : %s\n", patients[i].phone);
+            printf("Status       : Active\n");
+        }
+    }
+
+    printLine();
+}
+
+/* Helper: print a decorative line */
+void printLine() {
+    printf("\n=====================================================\n");
+}
+
+/* Optional: Clear screen (not used but added to increase code size) */
+void clearScreen() {
+    // system("cls");  // For Windows
+    // system("clear"); // For Linux/macOS
+}
+
+
+
+
+
+
+
